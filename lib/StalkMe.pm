@@ -1,9 +1,13 @@
 package StalkMe;
 use Mojo::Base 'Mojolicious';
 
+
 # This method will run once at server start
 sub startup {
   my $self = shift;
+
+  my $config = $self->plugin('Config');
+  $self->secrets($config->{secret});
 
   # Router
   my $r = $self->routes;
