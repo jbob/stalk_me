@@ -1,0 +1,76 @@
+% layout 'default';
+% title 'Sharing...';
+
+<div id="map-canvas"></div>
+
+<script>
+    "use strict;"
+    let fresh = true
+    let map
+    let marker
+    let trace = []
+    let repeater
+    let last_pos
+    let id = '<%= stash 'id' %>'
+    let initialize = function() {
+        let mode = 'last'
+        if(fresh) {
+            mode = 'full'
+        }
+        $.getJSON('<%= url_for '/api/view/' %>' + mode + '/' + id, function(res) {
+            try {
+                for (let p of res) {
+                    trace.push(new google.maps.LatLng(p.lat, p.lng))
+                }
+            } catch (e) {
+                alert("Something went wrong!")
+                clearInterval(repeater)
+                return
+            }
+            let path = new google.maps.Polyline({
+                path: trace,
+                geodesic: true,
+                strokeColor: '#2E10FF'
+            })
+            cur_pos = trace[trace.length - 1]
+            if (fresh) {
+                fresh = false
+                map = new google.maps.Map(document.getElementById('map-canvas'),{
+                                                center:{
+                                                    lat:cur_pos.lat(),
+                                                    lng:cur_pos.lng()
+                                                }, zoom:12
+                                            })
+                marker = new google.maps.Marker({
+                                        position:{
+                                            lat: cur_pos.lat(),
+                                            lng: cur_pos.lng()
+                                        }, map: map
+                                    })
+            } else {
+                if (!(last_pos && last_pos.lat() == cur_pos.lat() && last_pos.lng() == cur_pos.lng())) {
+                    map.setCenter({
+                        lat: cur_pos.lat(),
+                        lng: cur_pos.lng(),
+                        alt: 0
+                    })
+                }
+                marker.setPosition({
+                    lat: cur_pos.lat(),
+                    lng: cur_pos.lng(),
+                    alt: 0
+                })
+            }
+            last_pos = cur_pos
+            trace = []
+            path.setMap(map)
+        })
+    }
+    window.initialize = initialize
+    repeater = setInterval(initialize, 5000)
+</script>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyBss-NPwatp83PyQtBtG9jpOII6Sl374sM&callback=initialize"></script>
