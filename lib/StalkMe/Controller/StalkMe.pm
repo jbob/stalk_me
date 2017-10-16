@@ -5,8 +5,6 @@ use StalkMe::Model::Route;
 
 use Digest::MD5;
 
-my $routes = {};
-
 sub welcome {
   my $self = shift;
   $self->reply->static('index.html');
@@ -25,30 +23,38 @@ sub api_share {
     my $lat = $self->param('lat');
     my $lng = $self->param('lng');
     if ($lat and $lng) {
-        if (not $routes->{$id}) {
-            $routes->{$id} = new StalkMe::Model::Route;
-        }
-        $routes->{$id}->add_point({lat => $lat, lng => $lng});
+        $self->routes->search({ id => $id })->single(sub {
+            my ($routes, $err, $route) = @_;
+            if (not $route) {
+               $route = $self->routes->create({ id => $id });
+            }
+            $route->add_point({ lat => $lat, lng => $lng });
+            $route->save;
+            return $self->render(text => 'thx');
+        });
     }
 
     # Intermezzo: Maybe it is time for a cleanup?
-    if (int(rand(999_999_999)) % 100 == 0) {
-        # Yes it is
-        my $current_time = time;
-        for my $route_id ( keys %$routes ) {
-            if ($routes->{$route_id}->last_update < ($current_time - 60*60*4) ) {
-                # Last update is more than 4 hours in the past, throw away
-                delete $routes->{$route_id};
-            }
-        }
-    }
+    # TODO: Reiplement this
+    #if (int(rand(999_999_999)) % 100 == 0) {
+    #    # Yes it is
+    #    my $current_time = time;
+    #    for my $route_id ( keys %$routes ) {
+    #        if ($routes->{$route_id}->last_update < ($current_time - 60*60*4) ) {
+    #            # Last update is more than 4 hours in the past, throw away
+    #            delete $routes->{$route_id};
+    #        }
+    #    }
+    #}
 
-    return $self->render(text => 'thx');
+    #return $self->render(text => 'thx');
+    return $self->render_later;
+
 }
 
 sub view {
     my $self = shift;
-    my $id = $self->stash->{id} // $self->param('id');
+    my $id = $self->stash->{id};
     if (not $id) {
         $self->render(text => 'nope');
     }
@@ -59,12 +65,15 @@ sub api_view {
     my $self = shift;
     my $id = $self->stash->{id};
     my $mode = $self->stash->{mode};
-    if (not $id or not $routes->{$id}) {
-        return $self->render(json => {err => 'nope'});
-    }
-    return $self->render(json => $routes->{$id}->points) if $mode eq 'full';
-    return $self->render(json => [$routes->{$id}->get_last_point]) if $mode eq 'last';
-    return $self->render(json => {err => 'Unknown method'});
+    $self->routes->search({ id => $id })->single(sub {
+        my ($routes, $err, $route) = @_;
+        return $self->render(jsbon => {err => $err})           if $err;
+        return $self->render(json => {err => 'nope'})          if not $route;
+        return $self->render(json => $route->points)           if $mode eq 'full';
+        return $self->render(json => [$route->get_last_point]) if $mode eq 'last';
+        return $self->render(json => {err => 'Unkown method'});
+    });
+    $self->render_later;
 }
 
 1;

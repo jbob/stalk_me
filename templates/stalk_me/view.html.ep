@@ -4,7 +4,8 @@
 <div id="map-canvas"></div>
 
 <script>
-    "use strict;"
+    "use strict"
+    let cur_pos
     let fresh = true
     let map
     let marker

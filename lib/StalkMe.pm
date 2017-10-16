@@ -1,5 +1,6 @@
 package StalkMe;
 use Mojo::Base 'Mojolicious';
+use StalkMe::Model;
 
 
 # This method will run once at server start
@@ -8,6 +9,8 @@ sub startup {
 
   my $config = $self->plugin('Config');
   $self->secrets($config->{secret});
+  
+  $self->plugin('StalkMe::Helpers');
 
   # Router
   my $r = $self->routes;
