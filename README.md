@@ -12,7 +12,7 @@ Let your stalkers know where you are!
 
 ## Installation
 
-On any system that has already perl and cpanm installed simply execute:
+On any system that has already perl, cpanm and MongoDB installed simply execute:
 
     $ git clone https://github.com/jbob/stalk_me.git
     $ cd stalk_me
