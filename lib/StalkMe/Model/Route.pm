@@ -5,7 +5,7 @@ use Types::Standard qw( Str Int ArrayRef HashRef Num );
 
 
 field last_update => (
-    isa     => Str,
+    isa     => Num,
     builder => sub { time }
 );
 

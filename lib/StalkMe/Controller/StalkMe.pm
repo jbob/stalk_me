@@ -36,18 +36,18 @@ sub api_share {
 
     # Intermezzo: Maybe it is time for a cleanup?
     # TODO: Reiplement this
-    #if (int(rand(999_999_999)) % 100 == 0) {
-    #    # Yes it is
-    #    my $current_time = time;
-    #    for my $route_id ( keys %$routes ) {
-    #        if ($routes->{$route_id}->last_update < ($current_time - 60*60*4) ) {
-    #            # Last update is more than 4 hours in the past, throw away
-    #            delete $routes->{$route_id};
-    #        }
-    #    }
-    #}
+    if (int(rand(999_999_999)) % 100 == 0) {
+        # Yes it is
+        my $current_time = time;
+        $self->routes->search({
+            last_update => { '$lt' => ($current_time - 60*60*4) }
+        })->all(sub {
+            my ($routes, $err, $route) = @_;
+            warn "Deleting " . $route->id;
+            $route->remove;
+        });
+    }
 
-    #return $self->render(text => 'thx');
     return $self->render_later;
 
 }
