@@ -35,7 +35,6 @@ sub api_share {
     }
 
     # Intermezzo: Maybe it is time for a cleanup?
-    # TODO: Reiplement this
     if (int(rand(999_999_999)) % 100 == 0) {
         # Yes it is
         my $current_time = time;
