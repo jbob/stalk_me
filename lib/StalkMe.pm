@@ -19,7 +19,7 @@ sub startup {
   $r->get('/')->to('StalkMe#welcome');
 
   $r->get('/share')->to('StalkMe#share');
-  $r->post('/api/share')->to('StalkMe#api_share');
+  $r->any('/api/share')->to('StalkMe#api_share');
 
   $r->get('/view/*id')->to('StalkMe#view');
   $r->get('/api/view/:mode/*id')->to('StalkMe#api_view');

@@ -19,36 +19,33 @@ sub share {
 
 sub api_share {
     my $self = shift;
-    my $id = $self->session('id');
-    my $lat = $self->param('lat');
-    my $lng = $self->param('lng');
-    if ($lat and $lng) {
-        $self->routes->search({ id => $id })->single(sub {
-            my ($routes, $err, $route) = @_;
-            if (not $route) {
-               $route = $self->routes->create({ id => $id });
-            }
-            $route->add_point({ lat => $lat, lng => $lng });
-            $route->save;
-            return $self->render(text => 'thx');
-        });
+    if ($self->req->method eq 'POST') {
+        my $id = $self->session('id');
+        my $lat = $self->param('lat');
+        my $lng = $self->param('lng');
+        if ($lat and $lng) {
+            $self->routes->search({ id => $id })->single(sub {
+                my ($routes, $err, $route) = @_;
+                if (not $route) {
+                   $route = $self->routes->create({ id => $id });
+                }
+                $route->add_point({ lat => $lat, lng => $lng });
+                $route->save;
+                return $self->render(json => {msg =>  'thx'});
+            });
+        }
+        $self->cleanup;
+        return $self->render_later;
+    } elsif ($self->req->method eq 'GET') {
+        if (not $self->session('id')) {
+            $self->session(id => Digest::MD5::md5_base64( rand ));
+        }
+        return $self->render(json => {
+                                        id => $self->session('id'),
+                                        url => $self->url_for('/view/'.$self->session('id'))->to_abs
+                                     });
     }
-
-    # Intermezzo: Maybe it is time for a cleanup?
-    if (int(rand(999_999_999)) % 100 == 0) {
-        # Yes it is
-        my $current_time = time;
-        $self->routes->search({
-            last_update => { '$lt' => ($current_time - 60*60*4) }
-        })->all(sub {
-            my ($routes, $err, $route) = @_;
-            warn "Deleting " . $route->id;
-            $route->remove;
-        });
-    }
-
-    return $self->render_later;
-
+    return $self->render(json => { err => 'wtf?!' });
 }
 
 sub view {
