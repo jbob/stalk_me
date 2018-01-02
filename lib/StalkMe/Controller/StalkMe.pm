@@ -10,6 +10,11 @@ sub welcome {
   $self->reply->static('index.html');
 }
 
+sub download {
+    my $self = shift;
+    $self->reply->static('StalkMe.apk');
+}
+
 sub share {
     my $self = shift;
     if (not $self->session('id')) {

@@ -9,7 +9,7 @@ sub startup {
 
   my $config = $self->plugin('Config');
   $self->secrets($config->{secret});
-  
+
   $self->plugin('StalkMe::Helpers');
 
   # Router
@@ -17,6 +17,7 @@ sub startup {
 
   # Normal route to controller
   $r->get('/')->to('StalkMe#welcome');
+  $r->get('/download')->to('StalkMe#download');
 
   $r->get('/share')->to('StalkMe#share');
   $r->any('/api/share')->to('StalkMe#api_share');
