@@ -47,7 +47,7 @@ sub api_share {
         }
         return $self->render(json => {
                                         id => $self->session('id'),
-                                        url => $self->url_for('/view/'.$self->session('id'))->to_abs
+                                        url => $self->url_for('/view/'.$self->session('id'))->to_abs->scheme('https')
                                      });
     }
     return $self->render(json => { err => 'wtf?!' });
