@@ -63,7 +63,7 @@
                 })
             }
             last_pos = cur_pos
-            trace = []
+            // trace = [] # Why?
             path.setMap(map)
         })
     }
