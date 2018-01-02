@@ -12,6 +12,8 @@ sub welcome {
 
 sub download {
     my $self = shift;
+    $self->res->headers->content_type('application/vnd.android.package-archive');
+    $self->res->headers->content_disposition('attachment; filename StalkMe.apk');
     $self->reply->static('StalkMe.apk');
 }
 
