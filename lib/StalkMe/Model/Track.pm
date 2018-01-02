@@ -1,4 +1,4 @@
-package StalkMe::Model::Route;
+package StalkMe::Model::Track;
 
 use Mandel::Document;
 use Types::Standard qw( Str Int ArrayRef HashRef Num );

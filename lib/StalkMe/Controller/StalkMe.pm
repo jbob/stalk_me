@@ -1,7 +1,7 @@
 package StalkMe::Controller::StalkMe;
 use Mojo::Base 'Mojolicious::Controller';
 
-use StalkMe::Model::Route;
+use StalkMe::Model::Track;
 
 use Digest::MD5;
 
@@ -24,13 +24,13 @@ sub api_share {
         my $lat = $self->param('lat');
         my $lng = $self->param('lng');
         if ($lat and $lng) {
-            $self->routes->search({ id => $id })->single(sub {
-                my ($routes, $err, $route) = @_;
-                if (not $route) {
-                   $route = $self->routes->create({ id => $id });
+            $self->tracks->search({ id => $id })->single(sub {
+                my ($tracks, $err, $track) = @_;
+                if (not $track) {
+                   $track = $self->tracks->create({ id => $id });
                 }
-                $route->add_point({ lat => $lat, lng => $lng });
-                $route->save;
+                $track->add_point({ lat => $lat, lng => $lng });
+                $track->save;
                 return $self->render(json => {msg =>  'thx'});
             });
         }
@@ -61,12 +61,12 @@ sub api_view {
     my $self = shift;
     my $id = $self->stash->{id};
     my $mode = $self->stash->{mode};
-    $self->routes->search({ id => $id })->single(sub {
-        my ($routes, $err, $route) = @_;
+    $self->tracks->search({ id => $id })->single(sub {
+        my ($tracks, $err, $track) = @_;
         return $self->render(jsbon => {err => $err})           if $err;
-        return $self->render(json => {err => 'nope'})          if not $route;
-        return $self->render(json => $route->points)           if $mode eq 'full';
-        return $self->render(json => [$route->get_last_point]) if $mode eq 'last';
+        return $self->render(json => {err => 'nope'})          if not $track;
+        return $self->render(json => $track->points)           if $mode eq 'full';
+        return $self->render(json => [$track->get_last_point]) if $mode eq 'last';
         return $self->render(json => {err => 'Unkown method'});
     });
     $self->render_later;

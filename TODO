@@ -1,7 +1,0 @@
-* Preforking doesn't play well with global variable for routes
-  -> Use Mandel
-* Test screen on hack on iDevices
-* Test with video display:none
-* Clean-up JS code
-* Write cpanfile
-* Add README.md
